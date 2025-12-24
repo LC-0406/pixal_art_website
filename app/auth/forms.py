@@ -69,7 +69,7 @@ class RegistrationForm(FlaskForm):
         '邮箱',
         validators=[
             DataRequired(message='请输入邮箱'),
-            Email(message='请输入有效的邮箱地址'),
+            #Email(message='请输入有效的邮箱地址'),
             Length(max=120, message='邮箱地址太长')
         ],
         render_kw={
@@ -174,20 +174,19 @@ class ResetPasswordRequestForm(FlaskForm):
     """
     重置密码请求表单
     """
-    email = StringField(
-        '邮箱',
+    username = StringField(
+        '用户名',
         validators=[
-            DataRequired(message='请输入邮箱'),
-            Email(message='请输入有效的邮箱地址')
+            DataRequired(message='请输入用户名')
         ],
         render_kw={
             "class": "form-control",
-            "placeholder": "请输入注册时使用的邮箱"
+            "placeholder": "请输入注册时使用的用户名"
         }
     )
     
     submit = SubmitField(
-        '发送重置邮件',
+        '确认',
         render_kw={"class": "btn btn-primary"}
     )
 
