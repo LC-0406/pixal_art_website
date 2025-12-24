@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}像素画网站{% endblock %}</title>
+    
+    <!-- 添加 Google Fonts 像素字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <link rel="preload" href="{{ url_for('static', filename='fonts/zpix.ttf') }}" as="font" type="font/ttf" crossorigin>
+
+    <!-- 你的 CSS 文件 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- 页面特定CSS -->
+    {% block styles %}{% endblock %}
 </head>
 <body>
     <nav>
         <div class="nav-brand">
-            <a href="{{ url_for('canvas.index') }}">像素画</a>
+            <a href="{{ url_for('canvas.index') }}">LC Pixal Art</a>
         </div>
         <div class="nav-links">
             {% if current_user.is_authenticated %}
@@ -25,15 +37,23 @@
     </nav>
     
     <main>
+        <!-- 消息提示区域 - 支持Bootstrap和自定义类名 -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% if category in ['success', 'danger', 'warning', 'info'] %}
+                        <div class="alert alert-{{ category }} flash-{{ category }}">{{ message }}</div>
+                    {% else %}
+                        <div class="alert alert-info">{{ message }}</div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
         
         {% block content %}{% endblock %}
     </main>
+    
+    <!-- 页面特定JavaScript -->
+    {% block scripts %}{% endblock %}
 </body>
 </html>
