@@ -1,1 +1,156 @@
 {% extends "base.html" %}
+
+{% block title %}我的画布 - LC Pixal Art{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+    <h1 class="page-title">我的画布</h1>
+    
+    {% if canvases %}
+        <div class="canvas-list">
+            {% for canvas in canvases %}
+                <div class="canvas-card">
+                    <div class="canvas-header">
+                        <h3 class="canvas-title">{{ canvas.title }}</h3>
+                        <span class="canvas-dimensions">{{ canvas.width }}×{{ canvas.height }}</span>
+                    </div>
+                    
+                    <div class="canvas-preview">
+                        画布预览 ({{ canvas.width }}×{{ canvas.height }} 像素)
+                    </div>
+                    
+                    <div class="canvas-info">
+                        <span class="canvas-date">
+                            更新: {{ canvas.updated_at.strftime('%Y-%m-%d') if canvas.updated_at else '未知' }}
+                        </span>
+                        <span class="canvas-visibility">
+                            {{ '公开' if canvas.is_public else '私有' }}
+                        </span>
+                    </div>
+                    
+                    <div class="canvas-actions">
+                        <a href="{{ url_for('canvas.edit', canvas_id=canvas.id) }}" 
+                           class="canvas-btn canvas-btn-edit">
+                            编辑
+                        </a>
+                        <a href="{{ url_for('canvas.view', canvas_id=canvas.id) }}" 
+                           class="canvas-btn canvas-btn-view">
+                            查看
+                        </a>
+                        <form action="{{ url_for('canvas.delete', canvas_id=canvas.id) }}" 
+                              method="POST" 
+                              class="canvas-btn-delete-form">
+                            <button type="submit" 
+                                    class="canvas-btn-delete"
+                                    onclick="return confirm('确定要删除这个画布吗？')">
+                                删除
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h2>还没有画布哦！</h2>
+            <p>创建你的第一个像素画布，开始创作独特的像素艺术吧！</p>
+            <a href="{{ url_for('canvas.create') }}" class="action-btn action-btn-primary">
+                创建第一个画布
+            </a>
+        </div>
+    {% endif %}
+    
+    <div class="public-link">
+        <a href="{{ url_for('canvas.public') }}">查看公共画布 →</a>
+    </div>
+    
+{% else %}
+    <!-- 未登录用户看到的页面 -->
+    <div class="welcome-section">
+        <h1>欢迎来到 LC Pixal Art</h1>
+        <p>
+            这是一个创意像素画平台，在这里你可以创建、编辑和分享你的像素艺术作品。
+            使用我们强大的像素编辑器，创作属于你自己的像素世界！
+        </p>
+        
+        <div class="quick-actions">
+            <a href="{{ url_for('auth.login') }}" class="action-btn action-btn-primary">
+                立即登录
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="action-btn action-btn-secondary">
+                注册账号
+            </a>
+            <a href="{{ url_for('canvas.public') }}" class="action-btn action-btn-secondary">
+                浏览公共画布
+            </a>
+        </div>
+    </div>
+    
+    <div class="canvas-list">
+        <!-- 显示一些示例画布或公共画布预览 -->
+        {% if public_canvases %}
+            {% for canvas in public_canvases[:3] %}
+                <div class="canvas-card">
+                    <div class="canvas-header">
+                        <h3 class="canvas-title">{{ canvas.title }}</h3>
+                        <span class="canvas-dimensions">{{ canvas.width }}×{{ canvas.height }}</span>
+                    </div>
+                    
+                    <div class="canvas-preview">
+                        公共画布预览
+                    </div>
+                    
+                    <div class="canvas-info">
+                        <span class="canvas-date">
+                            作者: {{ canvas.user.username if canvas.user else '匿名' }}
+                        </span>
+                        <span class="canvas-visibility">
+                            公开
+                        </span>
+                    </div>
+                    
+                    <div class="canvas-actions">
+                        <a href="{{ url_for('canvas.view', canvas_id=canvas.id) }}" 
+                           class="canvas-btn canvas-btn-view">
+                            查看作品
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 处理删除确认
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteForms = document.querySelectorAll('.canvas-btn-delete-form');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('确定要删除这个画布吗？此操作不可撤销！')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // 添加画布卡片点击效果
+        const canvasCards = document.querySelectorAll('.canvas-card');
+        canvasCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 防止点击按钮时触发卡片点击
+                if (!e.target.closest('.canvas-btn')) {
+                    const editLink = card.querySelector('.canvas-btn-edit');
+                    const viewLink = card.querySelector('.canvas-btn-view');
+                    if (editLink) {
+                        editLink.click();
+                    } else if (viewLink) {
+                        viewLink.click();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

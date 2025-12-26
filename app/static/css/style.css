@@ -8,7 +8,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-/* 1. 基础样式与字体 */
+/* ==================== 1. 基础样式与字体 ==================== */
 * {
     margin: 0;
     padding: 0;
@@ -23,7 +23,7 @@ body {
     line-height: 1.6;
 }
 
-/* 2. 导航栏样式 - 像素风格 */
+/* ==================== 2. 导航栏样式 ==================== */
 nav {
     background: #0f3460;
     border-bottom: 4px solid #e94560;
@@ -86,7 +86,7 @@ nav {
     background: rgba(76, 201, 240, 0.1);
 }
 
-/* 3. 主要内容区域 */
+/* ==================== 3. 主要内容区域 ==================== */
 main {
     max-width: 1200px;
     margin: 2rem auto;
@@ -94,7 +94,308 @@ main {
     min-height: calc(100vh - 100px);
 }
 
-/* 4. 消息提示样式 - 兼容Bootstrap类名 */
+/* ==================== 4. 页面标题 ==================== */
+.page-title {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    color: #e94560;
+    font-size: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+    text-shadow: 2px 2px 0 #000;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #4cc9f0;
+}
+
+/* ==================== 5. 欢迎区域 ==================== */
+.welcome-section {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.3) 0%, rgba(37, 117, 252, 0.3) 100%);
+    margin: 2rem 0;
+    border: 3px solid #4cc9f0;
+    border-radius: 0;
+    box-shadow: 0 8px 25px rgba(76, 201, 240, 0.2);
+}
+
+.welcome-section h1 {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    color: #4cc9f0;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 3px 3px 0 #000;
+    letter-spacing: 1px;
+}
+
+.welcome-section p {
+    color: #e6e6e6;
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    line-height: 1.8;
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+/* ==================== 6. 动作按钮 ==================== */
+.action-btn {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    padding: 1rem 2rem;
+    border: 3px solid;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.action-btn-primary {
+    border-color: #e94560;
+    color: #e94560;
+    background: rgba(233, 69, 96, 0.1);
+}
+
+.action-btn-primary:hover {
+    background: rgba(233, 69, 96, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(233, 69, 96, 0.4);
+}
+
+.action-btn-secondary {
+    border-color: #4cc9f0;
+    color: #4cc9f0;
+    background: rgba(76, 201, 240, 0.1);
+}
+
+.action-btn-secondary:hover {
+    background: rgba(76, 201, 240, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(76, 201, 240, 0.4);
+}
+
+/* ==================== 7. 画布列表 ==================== */
+.canvas-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.canvas-card {
+    background: rgba(15, 52, 96, 0.8);
+    border: 3px solid #e94560;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.canvas-card:hover {
+    transform: translateY(-5px);
+    border-color: #4cc9f0;
+    box-shadow: 0 8px 25px rgba(76, 201, 240, 0.3);
+}
+
+.canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.canvas-title {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0;
+    text-shadow: 2px 2px 0 #000;
+    flex: 1;
+}
+
+.canvas-dimensions {
+    background: rgba(233, 69, 96, 0.3);
+    padding: 0.3rem 0.8rem;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: #fff;
+    border: 2px solid #e94560;
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+.canvas-preview {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.canvas-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.canvas-date {
+    color: #4cc9f0;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.canvas-visibility {
+    color: #e94560;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+/* ==================== 8. 画布操作按钮 ==================== */
+.canvas-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.canvas-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border: 2px solid;
+    background: transparent;
+    color: inherit;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.canvas-btn:hover {
+    transform: scale(1.05);
+}
+
+.canvas-btn-edit {
+    border-color: #4caf50;
+    color: #4caf50;
+}
+
+.canvas-btn-edit:hover {
+    background: rgba(76, 175, 80, 0.2);
+}
+
+.canvas-btn-view {
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+.canvas-btn-view:hover {
+    background: rgba(33, 150, 243, 0.2);
+}
+
+.canvas-btn-delete {
+    border-color: #f44336;
+    color: #f44336;
+    background: none;
+    border: 2px solid #f44336;
+    width: 100%;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 0.6rem;
+    transition: all 0.2s ease;
+}
+
+.canvas-btn-delete:hover {
+    background: rgba(244, 67, 54, 0.2);
+    transform: scale(1.05);
+}
+
+.canvas-btn-delete-form {
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+.canvas-btn-delete-form button {
+    width: 100%;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+/* ==================== 9. 空状态 ==================== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(15, 52, 96, 0.5);
+    border: 3px solid #4cc9f0;
+    margin: 3rem auto;
+    max-width: 800px;
+}
+
+.empty-state h2 {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    color: #4cc9f0;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.empty-state p {
+    color: #e6e6e6;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ==================== 10. 公共画布链接 ==================== */
+.public-link {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: rgba(76, 201, 240, 0.1);
+    border: 2px solid #4cc9f0;
+}
+
+.public-link a {
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
+    color: #4cc9f0;
+    text-decoration: none;
+    font-size: 1.2rem;
+    border-bottom: 2px dotted #4cc9f0;
+    transition: all 0.3s ease;
+}
+
+.public-link a:hover {
+    color: #e94560;
+    border-bottom: 2px solid #e94560;
+}
+
+/* ==================== 11. 消息提示样式 ==================== */
 .alert {
     padding: 1rem;
     margin: 1rem 0;
@@ -152,7 +453,7 @@ main {
     box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
 }
 
-/* 5. 登录/注册页面专用样式 */
+/* ==================== 12. 表单样式 ==================== */
 .row {
     display: flex;
     flex-wrap: wrap;
@@ -169,13 +470,6 @@ main {
     padding: 0 1rem;
 }
 
-@media (min-width: 768px) {
-    .col-md-6 {
-        flex: 0 0 50%;
-        max-width: 50%;
-    }
-}
-
 /* 卡片样式 */
 .card {
     background: rgba(15, 52, 96, 0.8);
@@ -184,6 +478,18 @@ main {
     border-radius: 0;
     overflow: hidden;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #e94560, #4cc9f0);
+    z-index: 1;
 }
 
 .card-header {
@@ -205,7 +511,6 @@ main {
     padding: 2rem;
 }
 
-/* 表单样式 */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -276,7 +581,7 @@ main {
     text-transform: uppercase;
     letter-spacing: 1px;
     border-radius: 0;
-    font-size: 0.8rem;
+    font-size: 1rem;
     text-align: center;
 }
 
@@ -341,8 +646,58 @@ main {
     color: #a0a0a0;
 }
 
-/* 响应式设计 */
+/* ==================== 13. 像素装饰 ==================== */
+.canvas-card::before {
+    content: 'PIXEL';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.1);
+    transform: rotate(15deg);
+}
+
+/* ==================== 14. 输入占位符样式 ==================== */
+::placeholder {
+    color: #888;
+    opacity: 1;
+    font-family: 'ChinesePixelFont', 'Courier New', monospace;
+}
+
+/* ==================== 15. 隐藏字段样式 ==================== */
+[type="hidden"] {
+    display: none;
+}
+
+/* ==================== 16. 滚动条样式 ==================== */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f3460;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e94560;
+    border: 2px solid #0f3460;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff6b8b;
+}
+
+/* ==================== 17. 响应式设计 ==================== */
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
 @media (max-width: 768px) {
+    /* 导航栏响应式 */
     nav {
         flex-direction: column;
         gap: 1rem;
@@ -359,11 +714,54 @@ main {
         font-size: 1.2rem;
     }
     
+    /* 主内容响应式 */
     main {
         padding: 0 1rem;
         margin: 1rem auto;
     }
     
+    /* 欢迎区域响应式 */
+    .welcome-section h1 {
+        font-size: 1.8rem;
+    }
+    
+    .welcome-section p {
+        font-size: 1rem;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .action-btn {
+        width: 100%;
+    }
+    
+    /* 画布列表响应式 */
+    .canvas-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .canvas-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .canvas-dimensions {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .canvas-actions {
+        flex-direction: column;
+    }
+    
+    /* 卡片样式响应式 */
     .card-body {
         padding: 1.5rem;
     }
@@ -371,46 +769,4 @@ main {
     .card-header h3 {
         font-size: 1rem;
     }
-}
-
-/* 像素风格装饰 */
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #e94560, #4cc9f0);
-    z-index: 1;
-}
-
-/* 隐藏字段样式 */
-[type="hidden"] {
-    display: none;
-}
-
-/* 输入占位符样式 */
-::placeholder {
-    color: #888;
-    opacity: 1;
-    font-family: 'ChinesePixelFont', 'Courier New', monospace;
-}
-
-/* 滚动条样式 */
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: #0f3460;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #e94560;
-    border: 2px solid #0f3460;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #ff6b8b;
 }

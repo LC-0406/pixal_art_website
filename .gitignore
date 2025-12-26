@@ -4,3 +4,4 @@
 /app/canvas/__pycache__
 /app/app.db
 /venv
+/checkdb.py
