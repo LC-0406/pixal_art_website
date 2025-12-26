@@ -37,15 +37,12 @@
                            class="canvas-btn canvas-btn-view">
                             查看
                         </a>
-                        <form action="{{ url_for('canvas.delete', canvas_id=canvas.id) }}" 
-                              method="POST" 
-                              class="canvas-btn-delete-form">
-                            <button type="submit" 
-                                    class="canvas-btn-delete"
-                                    onclick="return confirm('确定要删除这个画布吗？')">
-                                删除
-                            </button>
-                        </form>
+                        
+                        <a href="{{ url_for('canvas.delete', canvas_id=canvas.id) }}" 
+                                class="canvas-btn canvas-btn-delete"
+                                onclick="return confirm('确定要删除这个画布吗？')">
+                            删除
+                        </a>
                     </div>
                 </div>
             {% endfor %}
@@ -123,6 +120,7 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script>
     // 处理删除确认
     document.addEventListener('DOMContentLoaded', function() {
@@ -153,4 +151,5 @@
         });
     });
 </script>
+
 {% endblock %}

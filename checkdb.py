@@ -3,6 +3,8 @@ from app import db
 from app.models import User, Canvas
 import os
 import sys
+import json
+
 
 app = create_app()
 
@@ -99,6 +101,27 @@ def reset_database(db):
     except Exception as e:
         return False, f"重置失败: {str(e)}"
 
+def add_test_canvas(width:int, height:int):
+    
+    test_grid_data = json.dumps([[None for _ in range(width)] for _ in range(height)])
+
+    test_canvas = Canvas(
+        title = '测试画布',
+        width = width,
+        height = height,
+        grid_data = test_grid_data,
+        is_public = True,
+        user_id = 1
+    )
+    try:
+        with app.app_context():
+            db.session.add(test_canvas)
+            db.session.commit()
+        print(f'测试画布已添加')
+        return True
+    except Exception as e:
+        print(f'测试画布添加失败')
+
 def main():
     """主函数"""
     if len(sys.argv) < 2:
@@ -119,8 +142,10 @@ def main():
         print("\n查询完成！")
     elif len(sys.argv) == 2: 
         command = sys.argv[1]
-        command == 'reset_database'
-        reset_database(db)
+        if command == 'reset_database':
+            reset_database(db)
+        elif command == 'add_test_canvas':
+            add_test_canvas(32, 32)
     
 
 if __name__ == "__main__":

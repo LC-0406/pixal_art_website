@@ -10,7 +10,8 @@ def index():
     if current_user.is_authenticated:
         canvases = current_user.canvases.order_by(Canvas.updated_at.desc()).all()
         return render_template('canvas/index.html', title='我的画布', canvases=canvases)
-    return render_template('canvas/index.html', title='像素画')
+    public_canvases = Canvas.query.filter_by(is_public=True).all()
+    return render_template('canvas/index.html', title='像素画', public_canvases=public_canvases)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -49,7 +50,7 @@ def view(canvas_id):
         flash('无权访问此画布', 'danger')
         return redirect(url_for('canvas.index'))
     
-    return render_template('canvas/private_canvas.html', 
+    return render_template('canvas/view.html', 
                          title=canvas.title, 
                          canvas=canvas)
 
@@ -62,7 +63,7 @@ def edit(canvas_id):
         flash('无权编辑此画布', 'danger')
         return redirect(url_for('canvas.index'))
     
-    return render_template('canvas/private_canvas.html', 
+    return render_template('canvas/edit.html', 
                          title=f'编辑 - {canvas.title}', 
                          canvas=canvas,
                          editable=True)
@@ -90,7 +91,7 @@ def public():
                          title='公共画布',
                          canvases=public_canvases)
 
-@bp.route('/canvas/<int:canvas_id>/delete', methods=['POST'])
+@bp.route('/canvas/<int:canvas_id>/delete', methods=['GET'])
 @login_required
 def delete(canvas_id):
     canvas = Canvas.query.get_or_404(canvas_id)

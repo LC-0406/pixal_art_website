@@ -224,7 +224,7 @@ main {
 .canvas-dimensions {
     background: rgba(233, 69, 96, 0.3);
     padding: 0.3rem 0.8rem;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.8rem;
     color: #fff;
     border: 2px solid #e94560;
@@ -241,7 +241,7 @@ main {
     align-items: center;
     justify-content: center;
     color: #888;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.9rem;
 }
 
@@ -256,13 +256,13 @@ main {
 
 .canvas-date {
     color: #4cc9f0;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.8rem;
 }
 
 .canvas-visibility {
     color: #e94560;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.8rem;
     text-transform: uppercase;
 }
@@ -280,7 +280,7 @@ main {
     border: 2px solid;
     background: transparent;
     color: inherit;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.7rem;
     cursor: pointer;
     text-decoration: none;
@@ -314,15 +314,6 @@ main {
 .canvas-btn-delete {
     border-color: #f44336;
     color: #f44336;
-    background: none;
-    border: 2px solid #f44336;
-    width: 100%;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
-    font-size: 0.7rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    padding: 0.6rem;
-    transition: all 0.2s ease;
 }
 
 .canvas-btn-delete:hover {
@@ -652,7 +643,7 @@ main {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'ChinesePixelFont', 'Press Start 2P', 'Courier New', monospace;
     font-size: 0.6rem;
     color: rgba(255, 255, 255, 0.1);
     transform: rotate(15deg);

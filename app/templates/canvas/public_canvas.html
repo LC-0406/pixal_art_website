@@ -1,1 +1,65 @@
 {% extends "base.html" %}
+
+{% block title %}公共画布 - LC Pixal Art{% endblock %}
+
+{% block content %}
+<h1 class="page-title">公共画布</h1>
+{% if canvases %}
+        <div class="canvas-list">
+            {% for canvas in canvases %}
+                <div class="canvas-card">
+                    <div class="canvas-header">
+                        <h3 class="canvas-title">{{ canvas.title }}</h3>
+                        <span class="canvas-dimensions">{{ canvas.width }}×{{ canvas.height }}</span>
+                    </div>
+                    
+                    <div class="canvas-preview">
+                        画布预览 ({{ canvas.width }}×{{ canvas.height }} 像素)
+                    </div>
+                    
+                    <div class="canvas-info">
+                        <span class="canvas-date">
+                            更新: {{ canvas.updated_at.strftime('%Y-%m-%d') if canvas.updated_at else '未知' }}
+                        </span>
+                        <span class="canvas-visibility">
+                            {{ '公开' if canvas.is_public else '私有' }}
+                        </span>
+                    </div>
+                    
+                    <div class="canvas-actions">
+                        <a href="{{ url_for('canvas.view', canvas_id=canvas.id) }}" 
+                           class="canvas-btn canvas-btn-view">
+                            查看
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h2>暂无没有公共画布</h2>
+        </div>
+    {% endif %}
+{%endblock%}
+
+{%block scripts%}
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+        const canvasCards = document.querySelectorAll('.canvas-card');
+        canvasCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 防止点击按钮时触发卡片点击
+                if (!e.target.closest('.canvas-btn')) {
+                    const editLink = card.querySelector('.canvas-btn-edit');
+                    const viewLink = card.querySelector('.canvas-btn-view');
+                    if (editLink) {
+                        editLink.click();
+                    } else if (viewLink) {
+                        viewLink.click();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{%endblock%}
