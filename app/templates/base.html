@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}LC Pixal Art{% endblock %}</title>
+    <title>{% block title %}Pixal Art{% endblock %}</title>
     
     <!-- 添加 Google Fonts 像素字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
 <body>
     <nav>
         <div class="nav-brand">
-            <a href="{{ url_for('canvas.index') }}">LC Pixal Art</a>
+            <a href="{{ url_for('canvas.index') }}">Pixal Art</a>
         </div>
         <div class="nav-links">
             {% if current_user.is_authenticated %}
@@ -52,7 +52,8 @@
         
         {% block content %}{% endblock %}
     </main>
-    
+    {% block content2 %}{% endblock %}
+
     <!-- 页面特定JavaScript -->
     {% block scripts %}{% endblock %}
 </body>

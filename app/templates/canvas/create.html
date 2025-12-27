@@ -1,1 +1,174 @@
 {% extends "base.html" %}
+
+{% block title %}创建新画布 - 像素画网站{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <h1>创建新画布</h1>
+    
+    <form method="POST" action="{{ url_for('canvas.create') }}" class="create-form">
+        <!-- CSRF保护令牌（如果使用Flask-WTF） -->
+        {% if csrf_token %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        
+        <!-- 画布标题 -->
+        <div class="form-group">
+            <label for="title">画布标题 *</label>
+            <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                value="{{ form_data.title if form_data else '' }}"
+                placeholder="例如：我的像素艺术" 
+                required
+                minlength="2"
+                maxlength="100"
+                class="form-control"
+            >
+            <small class="form-hint">为你的画布起个名字（2-100个字符）</small>
+            {% if errors and errors.title %}
+                <div class="error-message">{{ errors.title[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 画布宽度 -->
+        <div class="form-group">
+            <label for="width">画布宽度（像素） *</label>
+            <input 
+                type="number" 
+                id="width" 
+                name="width" 
+                value="{{ form_data.width if form_data else 32 }}"
+                min="8"
+                max="256"
+                step="8"
+                required
+                class="form-control"
+            >
+            <small class="form-hint">建议值：16, 32, 64, 128（8的倍数）</small>
+            {% if errors and errors.width %}
+                <div class="error-message">{{ errors.width[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 画布高度 -->
+        <div class="form-group">
+            <label for="height">画布高度（像素） *</label>
+            <input 
+                type="number" 
+                id="height" 
+                name="height" 
+                value="{{ form_data.height if form_data else 32 }}"
+                min="8"
+                max="256"
+                step="8"
+                required
+                class="form-control"
+            >
+            <small class="form-hint">建议值：16, 32, 64, 128（8的倍数）</small>
+            {% if errors and errors.height %}
+                <div class="error-message">{{ errors.height[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- 是否公开 -->
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input 
+                    type="checkbox" 
+                    id="is_public" 
+                    name="is_public" 
+                    {% if form_data and form_data.is_public %}checked{% endif %}
+                    class="checkbox"
+                >
+                <label for="is_public" class="checkbox-label">
+                    设为公共画布（其他用户可见）
+                </label>
+            </div>
+            <small class="form-hint">
+                如果勾选，其他用户可以在"公共画布"页面看到并编辑你的画布
+            </small>
+        </div>
+        
+        <!-- 按钮区域 -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">创建画布</button>
+            <a href="{{ url_for('canvas.index') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+    
+    <!-- 画布预览区域 -->
+    <div class="canvas-preview">
+        <h3>画布预览</h3>
+        <div id="preview-container">
+            <div id="pixel-grid"></div>
+        </div>
+        <p class="preview-info">
+            尺寸：<span id="preview-size">32 x 32</span> 像素 
+            （总共 <span id="total-pixels">1024</span> 个像素点）
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// 实时预览画布尺寸变化
+document.addEventListener('DOMContentLoaded', function() {
+    const widthInput = document.getElementById('width');
+    const heightInput = document.getElementById('height');
+    const previewSize = document.getElementById('preview-size');
+    const totalPixels = document.getElementById('total-pixels');
+    const pixelGrid = document.getElementById('pixel-grid');
+    
+    function updatePreview() {
+        const width = parseInt(widthInput.value) || 32;
+        const height = parseInt(heightInput.value) || 32;
+        
+        // 更新预览信息
+        previewSize.textContent = `${width} x ${height}`;
+        totalPixels.textContent = (width * height).toLocaleString();
+        
+        // 生成预览网格
+        updateGridPreview(width, height);
+    }
+    
+    function updateGridPreview(width, height) {
+        // 清除现有网格
+        pixelGrid.innerHTML = '';
+        
+        // 计算合适的像素大小（保持预览区域大小合理）
+        const maxDimension = 200; // 最大预览区域尺寸
+        const pixelSize = Math.min(
+            Math.floor(maxDimension / Math.max(width, height)),
+            10 // 最大像素尺寸
+        );
+        
+        // 设置网格容器尺寸
+        pixelGrid.style.width = `${width * pixelSize}px`;
+        pixelGrid.style.height = `${height * pixelSize}px`;
+        pixelGrid.style.gridTemplateColumns = `repeat(${width}, ${pixelSize}px)`;
+        pixelGrid.style.gridTemplateRows = `repeat(${height}, ${pixelSize}px)`;
+        
+        // 创建像素点
+        for (let i = 0; i < width * height; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'preview-pixel';
+            pixel.style.width = `${pixelSize}px`;
+            pixel.style.height = `${pixelSize}px`;
+            pixelGrid.appendChild(pixel);
+        }
+    }
+    
+    // 监听输入变化
+    widthInput.addEventListener('input', updatePreview);
+    heightInput.addEventListener('change', updatePreview);
+    heightInput.addEventListener('input', updatePreview);
+    widthInput.addEventListener('change', updatePreview);
+    
+    // 初始加载时更新预览
+    updatePreview();
+});
+</script>
+{% endblock %}

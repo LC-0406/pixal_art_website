@@ -5,3 +5,5 @@
 /app/app.db
 /venv
 /checkdb.py
+/app/templates/canvas/view copy.html
+/app/templates/canvas/edit copy.html

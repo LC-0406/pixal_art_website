@@ -1,1 +1,919 @@
 {% extends "base.html" %}
+
+{% block title %}编辑 - {{ canvas.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-evenly">
+    
+    <!-- 左侧颜色选择器区域 - 固定在左侧 -->
+    <div class="color-picker-sidebar" style="
+        flex: 0 0 300px; /* 固定宽度300px */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* 垂直居中 */
+        height: 100vh;
+        padding: 1.5rem;
+        background: rgba(15, 28, 45, 0.95); /* 半透明深色背景 */
+        border-right: 3px solid #4cc9f0;
+        box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+        z-index: 10; /* 确保在最上层 */
+        overflow-y: auto; /* 如果内容过多可以滚动 */
+        overflow-x: hidden; /* 防止水平滚动 */
+    ">
+        <!-- 颜色选择器 -->
+        <div class="color-picker-container">
+            <h4 style="color: #4cc9f0; font-family: 'ChinesePixelFont', 'Courier New', monospace; margin-bottom: 0.5rem;">
+                颜色选择器: 
+            </h4>
+            
+            <!-- 颜色选择器网格 (10列×8行) -->
+            <div class="color-palette" 
+                 style="display: grid; 
+                        grid-template-columns: repeat(10, 1fr); 
+                        grid-template-rows: repeat(8, 1fr);
+                        gap: 3px; 
+                        margin-bottom: 1.5rem;
+                        background: rgba(15, 52, 96, 0.8);
+                        padding: 0.5rem;
+                        border: 2px solid #4cc9f0;
+                        height: 200px;">
+                <!-- 颜色将通过JavaScript动态生成 -->
+            </div>
+            
+            <!-- 操作按钮组 -->
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem;">
+                <!-- 取色按钮 -->
+                <button id="color-pick-btn" 
+                        class="canvas-btn canvas-btn-edit"
+                        style="padding: 0.8rem;">
+                    取色 (当前: <span id="current-color" style="color: #000000;">黑色</span>)
+                </button>
+                
+                <!-- 擦除按钮 -->
+                <button id="erase-btn" 
+                        class="canvas-btn"
+                        style="padding: 0.8rem;
+                               border-color: #f44336;
+                               color: #f44336;">
+                    擦除
+                </button>
+                
+                <!-- 全部清除按钮 -->
+                <button id="clear-all-btn" 
+                        class="canvas-btn"
+                        style="padding: 0.8rem;
+                               border-color: #FF9800;
+                               color: #FF9800;">
+                    全部清除
+                </button>
+            </div>
+            
+            <!-- 当前颜色预览 -->
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; background: rgba(15, 52, 96, 0.5); padding: 1rem; border: 2px solid #e94560;">
+                <div style="color: #4cc9f0; font-family: 'ChinesePixelFont', 'Courier New', monospace; text-align: center;">
+                    当前设置
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                    <div id="color-preview" 
+                         style="width: 60px; 
+                                height: 60px; 
+                                background-color: #000000;
+                                border: 3px solid #4cc9f0;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <div id="color-hex" 
+                             style="font-family: 'Press Start 2P', 'Courier New', monospace;
+                                    color: #e94560;
+                                    font-size: 0.8rem;">
+                            #000000
+                        </div>
+                        <div id="mode-indicator" 
+                             style="font-family: 'ChinesePixelFont', 'Courier New', monospace;
+                                    color: #4cc9f0;
+                                    font-size: 0.9rem;">
+                            模式: <span id="current-mode">绘画</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 画布操作按钮 -->
+            <div class="canvas-actions" style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(76, 201, 240, 0.3);">
+                <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
+                    <a href="{{ url_for('canvas.view', canvas_id=canvas.id) }}" 
+                       class="canvas-btn canvas-btn-view" style="text-align: center;">
+                        完成编辑
+                    </a>
+                    <a href="{{ url_for('canvas.index') }}" 
+                       class="canvas-btn canvas-btn-view" style="text-align: center;">
+                        返回列表
+                    </a>
+                </div>
+            </div>
+            <div class="canvas-info" style="
+            flex-shrink: 0; /* 防止被压缩 */
+            margin-bottom: 1.5rem; 
+            padding-bottom: 1rem; 
+            border-bottom: 2px solid #4cc9f0;
+            ">
+                <div>
+                    <span class="canvas-dimensions">{{ canvas.width }} × {{ canvas.height }} 像素</span>
+                    <span class="canvas-visibility" style="margin-left: 1rem;">
+                        {{ '公开' if canvas.is_public else '私有' }}
+                    </span>
+                </div>
+                <div class="canvas-date">
+                    创建于: {{ canvas.created_at.strftime('%Y-%m-%d') if canvas.created_at else '未知' }}
+                </div>
+            </div>
+            <div id="save-status" 
+             style="flex-shrink: 0;
+                    margin-top: 1rem; 
+                    padding: 0.5rem; 
+                    text-align: center; 
+                    font-family: 'ChinesePixelFont', 'Courier New', monospace;
+                    display: none;">
+            <span id="save-message"></span>
+        </div>
+        </div>
+    </div>
+    
+    <!-- 右侧画布区域 - 自适应剩余空间 -->
+    <div class="canvas-content" style="
+        flex: 1; /* 占据剩余空间 */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* 防止内容溢出 */
+        padding: 0rem 1rem;
+        background: rgba(15, 28, 45, 0.9);
+    ">
+        
+
+        <!-- 画布展示区域 - 自适应容器 -->
+        <div class="canvas-display-container" style="
+            flex: 1; /* 占据剩余垂直空间 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 防止内容溢出 */
+        ">
+            <!-- 画布包装器 -->
+            <div class="canvas-wrapper-container" style="
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: auto; /* 保持可滚动 */
+                padding: 1rem;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 4px;
+                position: relative;
+                min-width: 0; /* 重要：防止flex容器溢出 */
+                min-height: 0; /* 重要：防止flex容器溢出 */
+            ">
+                <div class="canvas-wrapper" 
+                     id="canvas-wrapper"
+                     style="
+                        /* 关键：移除所有限制尺寸的样式 */
+                        position: relative;
+                        cursor: crosshair;
+                        background-color: #393939;
+                        border: 3px solid #000000;
+                        /* 包装器尺寸完全由Canvas决定 */
+                        display: inline-block; /* 尺寸由内容决定 */
+                        /* 确保没有外边距和内边距影响尺寸 */
+                        margin: 0;
+                        padding: 0;
+                     ">
+                    
+                    <!-- 多层Canvas架构 -->
+                    
+                    <!-- 第2层：像素绘制层（主层） -->
+                    <canvas class="canvas-layer" 
+                            id="canvas-pixels"></canvas>
+                    
+                    
+                    <!-- 第4层：交互层（鼠标事件） -->
+                    <canvas class="canvas-layer" 
+                            id="canvas-interaction"></canvas>
+                    
+                </div>
+            </div>
+            
+            <!-- 编辑提示 -->
+            <div style="
+                flex-shrink: 0; /* 防止被压缩 */
+                text-align: center; 
+                margin-top: 1rem; 
+                padding: 0.5rem; 
+                background: rgba(76, 175, 80, 0.1); 
+                border: 2px solid #4caf50;
+                border-radius: 4px;
+            ">
+                <p style="color: #4caf50; font-family: 'ChinesePixelFont', 'Courier New', monospace; margin: 0; font-size: 0.9rem;">
+                    提示: 点击画布像素进行绘制，点击颜色选择器选择颜色，使用"擦除"按钮清除像素，"全部清除"按钮清空画布
+                </p>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 像素画布编辑器
+document.addEventListener('DOMContentLoaded', function() {
+    // 配置常量
+    const CANVAS_WIDTH = {{ canvas.width }};
+    const CANVAS_HEIGHT = {{ canvas.height }};
+    const PIXEL_SIZE = 1; // 每个像素在Canvas上的实际大小（像素）
+    const DISPLAY_PIXEL_SIZE = 16; // 像素在屏幕上显示的大小
+    const ZOOM_LEVELS = [0.05, 0.1, 0.25, 0.5, 1, 2, 3, 4, 5, 6];
+    const DEFAULT_ZOOM_INDEX = 4; // 默认缩放级别为1
+    const pixelData = {{ canvas.grid_data|safe }};
+    
+    // 状态变量
+    let currentColor = '#000000';
+    let currentMode = 'paint'; // 'paint' 或 'erase'
+    let isDrawing = false;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let canvasOffsetX = 0;
+    let canvasOffsetY = 0;
+    let currentZoomIndex = DEFAULT_ZOOM_INDEX;
+    let currentZoom = ZOOM_LEVELS[DEFAULT_ZOOM_INDEX];
+    
+    // Canvas上下文变量
+    let ctxPixels = null;
+    let ctxInteraction = null;
+    
+    // 获取DOM元素
+    const canvasPixels = document.getElementById('canvas-pixels');
+    const canvasInteraction = document.getElementById('canvas-interaction');
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+    const colorPreview = document.getElementById('color-preview');
+    const colorHex = document.getElementById('color-hex');
+    const currentModeSpan = document.getElementById('current-mode');
+    const currentColorSpan = document.getElementById('current-color');
+    const colorPalette = document.querySelector('.color-palette');
+    const colorPickBtn = document.getElementById('color-pick-btn');
+    const eraseBtn = document.getElementById('erase-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const saveStatus = document.getElementById('save-status');
+    const saveMessage = document.getElementById('save-message');
+    
+    // 初始化Canvas
+    function initCanvases() {
+        console.log('初始化Canvas，尺寸:', CANVAS_WIDTH, 'x', CANVAS_HEIGHT);
+        
+        // 设置像素层Canvas
+        // Canvas的实际像素尺寸是画布尺寸乘以像素大小
+        canvasPixels.width = CANVAS_WIDTH * PIXEL_SIZE;
+        canvasPixels.height = CANVAS_HEIGHT * PIXEL_SIZE;
+        canvasPixels.style.width = `${CANVAS_WIDTH * DISPLAY_PIXEL_SIZE}px`;
+        canvasPixels.style.height = `${CANVAS_HEIGHT * DISPLAY_PIXEL_SIZE}px`;
+        canvasPixels.style.position = 'absolute';
+        canvasPixels.style.left = '0';
+        canvasPixels.style.top = '0';
+        canvasPixels.style.imageRendering = 'pixelated'; // 保持像素锐利
+        
+        // 设置交互层Canvas
+        canvasInteraction.width = CANVAS_WIDTH * PIXEL_SIZE;
+        canvasInteraction.height = CANVAS_HEIGHT * PIXEL_SIZE;
+        canvasInteraction.style.width = `${CANVAS_WIDTH * DISPLAY_PIXEL_SIZE}px`;
+        canvasInteraction.style.height = `${CANVAS_HEIGHT * DISPLAY_PIXEL_SIZE}px`;
+        canvasInteraction.style.position = 'absolute';
+        canvasInteraction.style.left = '0';
+        canvasInteraction.style.top = '0';
+        canvasInteraction.style.imageRendering = 'pixelated';
+        
+        // 设置包装器尺寸
+        canvasWrapper.style.width = `${CANVAS_WIDTH * DISPLAY_PIXEL_SIZE}px`;
+        canvasWrapper.style.height = `${CANVAS_HEIGHT * DISPLAY_PIXEL_SIZE}px`;
+        
+        // 获取Canvas上下文
+        ctxPixels = canvasPixels.getContext('2d');
+        ctxInteraction = canvasInteraction.getContext('2d');
+        
+        // 设置像素化渲染
+        ctxPixels.imageSmoothingEnabled = false;
+        ctxInteraction.imageSmoothingEnabled = false;
+        
+        // 应用初始缩放
+        applyZoom();
+        
+        // 初始化像素层为白色背景
+        ctxPixels.fillStyle = '#FFFFFF';
+        ctxPixels.fillRect(0, 0, canvasPixels.width, canvasPixels.height);
+        
+        // 如果有现有像素数据，绘制它们
+        loadExistingPixels();
+        
+        console.log('Canvas初始化完成');
+        console.log('实际Canvas尺寸:', canvasPixels.width, 'x', canvasPixels.height);
+        console.log('显示尺寸:', canvasPixels.style.width, 'x', canvasPixels.style.height);
+    }
+    
+    // 应用缩放
+    function applyZoom() {
+        const scale = ZOOM_LEVELS[currentZoomIndex];
+        currentZoom = scale;
+        
+        // 更新Canvas显示尺寸（缩放显示大小）
+        const scaledWidth = CANVAS_WIDTH * DISPLAY_PIXEL_SIZE * scale;
+        const scaledHeight = CANVAS_HEIGHT * DISPLAY_PIXEL_SIZE * scale;
+        
+        canvasPixels.style.transform = `scale(${scale})`;
+        canvasPixels.style.transformOrigin = '0 0';
+        
+        canvasInteraction.style.transform = `scale(${scale})`;
+        canvasInteraction.style.transformOrigin = '0 0';
+        
+        canvasWrapper.style.width = `${scaledWidth}px`;
+        canvasWrapper.style.height = `${scaledHeight}px`;
+        
+        console.log('应用缩放:', scale, '倍');
+        console.log('缩放后尺寸:', scaledWidth, 'x', scaledHeight);
+        
+        // 重新加载像素数据以应用缩放
+        if (ctxPixels) {
+            // 清除并重新绘制
+            ctxPixels.fillStyle = '#FFFFFF';
+            ctxPixels.fillRect(0, 0, canvasPixels.width, canvasPixels.height);
+            loadExistingPixels();
+        }
+    }
+    
+    // 加载现有像素数据
+    function loadExistingPixels() {
+        if (!ctxPixels || !pixelData) {
+            console.log('无法加载像素数据：ctxPixels或pixelData为空');
+            return;
+        }
+        
+        console.log('开始加载像素数据...');
+        console.log('pixelData类型:', typeof pixelData);
+        console.log('pixelData长度:', pixelData.length);
+        
+        // 清除像素层
+        ctxPixels.fillStyle = '#FFFFFF';
+        ctxPixels.fillRect(0, 0, canvasPixels.width, canvasPixels.height);
+
+        let pixelCount = 0;
+        
+        // 绘制像素数据
+        for (let y = 0; y < CANVAS_HEIGHT; y++) {
+            // 检查行数据是否存在
+            if (!pixelData[y]) {
+                console.warn(`第${y}行数据不存在`);
+                continue;
+            }
+            
+            for (let x = 0; x < CANVAS_WIDTH; x++) {
+                const color = pixelData[y][x];
+                if (color && color !== '#FFFFFF' && color !== '#ffffff') { // 跳过白色（背景色）
+                    ctxPixels.fillStyle = color;
+                    // 注意：这里使用PIXEL_SIZE=1，所以每个像素就是1x1
+                    ctxPixels.fillRect(
+                        x * PIXEL_SIZE,
+                        y * PIXEL_SIZE,
+                        PIXEL_SIZE,
+                        PIXEL_SIZE
+                    );
+                    pixelCount++;
+                }
+            }
+        }
+        
+        console.log(`加载了 ${pixelCount} 个像素`);
+        
+        // 绘制网格（可选，用于调试）
+        //drawGrid();
+    }
+    
+    // 绘制网格（调试用）
+    function drawGrid() {
+        if (!ctxPixels) return;
+        
+        ctxPixels.strokeStyle = '#EEEEEE';
+        ctxPixels.lineWidth = 0.1;
+        
+        // 绘制垂直线
+        for (let x = 0; x <= CANVAS_WIDTH; x++) {
+            ctxPixels.beginPath();
+            ctxPixels.moveTo(x * PIXEL_SIZE, 0);
+            ctxPixels.lineTo(x * PIXEL_SIZE, CANVAS_HEIGHT * PIXEL_SIZE);
+            ctxPixels.stroke();
+        }
+        
+        // 绘制水平线
+        for (let y = 0; y <= CANVAS_HEIGHT; y++) {
+            ctxPixels.beginPath();
+            ctxPixels.moveTo(0, y * PIXEL_SIZE);
+            ctxPixels.lineTo(CANVAS_WIDTH * PIXEL_SIZE, y * PIXEL_SIZE);
+            ctxPixels.stroke();
+        }
+    }
+    
+    // 初始化颜色选择器
+    function initColorPicker() {
+        // 预定义颜色集合 (10x8网格)
+        const colors = [
+            // 第一行: 基础颜色
+            '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
+            '#FF0000', '#FF6600', '#FFCC00', '#FFFF00',
+            // 第二行
+            '#00FF00', '#00CC66', '#00FFFF', '#0066FF', '#6600FF', '#CC00FF',
+            '#FF00CC', '#FF0066', '#FF3300', '#FF6633',
+            // 第三行
+            '#993300', '#663300', '#330000', '#003300', '#003333', '#000033',
+            '#330066', '#660099', '#9900CC', '#CC33FF',
+            // 第四行
+            '#FF66FF', '#FF99CC', '#FFCCCC', '#FFCC99', '#FFFF99', '#CCFF99',
+            '#99FF99', '#66FFCC', '#99FFFF', '#CCFFFF',
+            // 第五行
+            '#CCCCFF', '#9999FF', '#6666CC', '#333399', '#000066', '#003366',
+            '#006699', '#0099CC', '#00CCFF', '#33CCFF',
+            // 第六行
+            '#FF3333', '#FF6666', '#FF9999', '#FFCCCC', '#FFFFFF', '#E6E6E6',
+            '#B3B3B3', '#808080', '#4D4D4D', '#1A1A1A',
+            // 第七行
+            '#4A90E2', '#50E3C2', '#B8E986', '#F5A623', '#D0021B', '#9013FE',
+            '#BD10E0', '#417505', '#8B572A', '#7ED321',
+            // 第八行
+            '#F8E71C', '#8B4513', '#2E8B57', '#4682B4', '#D2691E', '#6495ED',
+            '#DC143C', '#00CED1', '#9400D3', '#FF1493'
+        ];
+        
+        // 生成颜色网格
+        for (let i = 0; i < colors.length; i++) {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'color-cell';
+            colorDiv.style.backgroundColor = colors[i];
+            colorDiv.style.width = '20px';
+            colorDiv.style.height = '20px';
+            colorDiv.style.cursor = 'pointer';
+            colorDiv.style.border = '1px solid rgba(255,255,255,0.1)';
+            colorDiv.style.boxSizing = 'border-box';
+            colorDiv.title = colors[i];
+            
+            // 添加点击事件
+            colorDiv.addEventListener('click', function() {
+                setColor(colors[i]);
+            });
+            
+            // 添加鼠标悬停效果
+            colorDiv.addEventListener('mouseenter', function() {
+                this.style.border = '1px solid #4cc9f0';
+                this.style.transform = 'scale(1.1)';
+                this.style.zIndex = '1';
+            });
+            
+            colorDiv.addEventListener('mouseleave', function() {
+                this.style.border = '1px solid rgba(255,255,255,0.1)';
+                this.style.transform = 'scale(1)';
+                this.style.zIndex = '0';
+            });
+            
+            colorPalette.appendChild(colorDiv);
+        }
+    }
+    
+    // 设置当前颜色
+    function setColor(color) {
+        currentColor = color;
+        colorPreview.style.backgroundColor = color;
+        colorHex.textContent = color.toUpperCase();
+        currentColorSpan.textContent = color.toUpperCase();
+        currentColorSpan.style.color = color;
+        
+        // 如果当前模式是擦除，切换回绘画模式
+        if (currentMode === 'erase') {
+            setMode('paint');
+        }
+    }
+    
+    // 设置当前模式
+    function setMode(mode) {
+        currentMode = mode;
+        currentModeSpan.textContent = mode === 'paint' ? '绘画' : '擦除';
+        
+        // 更新按钮状态
+        if (mode === 'erase') {
+            eraseBtn.style.backgroundColor = '#f44336';
+            eraseBtn.style.color = '#FFFFFF';
+            eraseBtn.style.fontWeight = 'bold';
+        } else {
+            eraseBtn.style.backgroundColor = 'transparent';
+            eraseBtn.style.color = '#f44336';
+            eraseBtn.style.fontWeight = 'normal';
+        }
+    }
+    
+    // 获取鼠标在Canvas上的像素坐标
+    function getPixelCoordinates(event) {
+        const rect = canvasInteraction.getBoundingClientRect();
+        
+        // 计算鼠标在Canvas上的位置（考虑缩放和偏移）
+        const x = (event.clientX - rect.left) / currentZoom;
+        const y = (event.clientY - rect.top) / currentZoom;
+        
+        // 转换为像素坐标（基于显示像素大小）
+        const pixelX = Math.floor(x / DISPLAY_PIXEL_SIZE);
+        const pixelY = Math.floor(y / DISPLAY_PIXEL_SIZE);
+        
+        return { pixelX, pixelY };
+    }
+    
+    // 绘制单个像素
+    function drawPixel(x, y, color = null) {
+        if (!ctxPixels || x < 0 || x >= CANVAS_WIDTH || y < 0 || y >= CANVAS_HEIGHT) {
+            return;
+        }
+        
+        const pixelColor = color || (currentMode === 'erase' ? '#FFFFFF' : currentColor);
+        
+        ctxPixels.fillStyle = pixelColor;
+        ctxPixels.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+        
+        // 更新pixelData（如果存在）
+        if (pixelData) {
+            if (!pixelData[y]) {
+                pixelData[y] = [];
+            }
+            pixelData[y][x] = pixelColor;
+        }
+        
+        // 保存到服务器
+        //savePixel(x, y, pixelColor);
+    }
+    
+    // 保存像素到服务器
+    function savePixel() {
+        // 这里可以添加保存到服务器的逻辑
+        fetch(`/api/canvas/{{canvas.id}}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                gridData: pixelData
+            })
+        })
+        
+        // 显示保存状态
+        showSaveStatus('保存中...', '#FF9800');
+        
+        // 模拟保存延迟
+        setTimeout(() => {
+            showSaveStatus('已保存', '#4CAF50');
+        }, 300);
+    }
+    
+    // 显示保存状态
+    function showSaveStatus(message, color) {
+        saveMessage.textContent = message;
+        saveStatus.style.display = 'block';
+        saveStatus.style.backgroundColor = color + '20'; // 添加透明度
+        saveStatus.style.color = color;
+        saveStatus.style.border = `1px solid ${color}`;
+        
+        // 3秒后隐藏
+        setTimeout(() => {
+            saveStatus.style.display = 'none';
+        }, 3000);
+    }
+    
+    // 清除单个像素
+    function erasePixel(x, y) {
+        drawPixel(x, y, '#FFFFFF');
+    }
+    
+    // 清除整个画布
+    function clearCanvas() {
+        if (!confirm('确定要清除整个画布吗？此操作不可撤销。')) {
+            return;
+        }
+        
+        ctxPixels.fillStyle = '#FFFFFF';
+        ctxPixels.fillRect(0, 0, canvasPixels.width, canvasPixels.height);
+        
+        // 清除pixelData
+        if (pixelData) {
+            for (let y = 0; y < CANVAS_HEIGHT; y++) {
+                for (let x = 0; x < CANVAS_WIDTH; x++) {
+                    if (!pixelData[y]) {
+                        pixelData[y] = [];
+                    }
+                    pixelData[y][x] = '#FFFFFF';
+                }
+            }
+        }
+        
+        showSaveStatus('画布已清除', '#f44336');
+    }
+    
+    // 取色功能
+    function pickColor(event) {
+        const { pixelX, pixelY } = getPixelCoordinates(event);
+        
+        // 确保坐标在范围内
+        if (pixelX < 0 || pixelX >= CANVAS_WIDTH || pixelY < 0 || pixelY >= CANVAS_HEIGHT) {
+            return;
+        }
+        
+        // 直接从pixelData获取颜色
+        let color = '#FFFFFF';
+        if (pixelData && pixelData[pixelY] && pixelData[pixelY][pixelX]) {
+            color = pixelData[pixelY][pixelX];
+        } else {
+            // 如果pixelData中没有，从Canvas获取
+            const imageData = ctxPixels.getImageData(
+                pixelX * PIXEL_SIZE, 
+                pixelY * PIXEL_SIZE, 
+                1, 1
+            );
+            
+            const [r, g, b] = imageData.data;
+            color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+        }
+        
+        setColor(color);
+        showSaveStatus(`已取色: ${color}`, '#4cc9f0');
+    }
+    
+    // 事件监听器初始化
+    function initEventListeners() {
+        // 鼠标按下事件
+        canvasInteraction.addEventListener('mousedown', function(event) {
+            event.preventDefault();
+            const altKeyPressed = event.altKey;
+            
+            if (altKeyPressed) {
+                // Alt + 左键: 开始拖拽
+                isDragging = true;
+                dragStartX = event.clientX - canvasOffsetX;
+                dragStartY = event.clientY - canvasOffsetY;
+                
+                // 改变光标样式
+                canvasWrapper.style.cursor = 'grabbing';
+            } else if (event.button === 0) { // 左键
+                // 左键: 开始绘制
+                isDrawing = true;
+                
+                const { pixelX, pixelY } = getPixelCoordinates(event);
+                console.log('开始绘制，位置:', pixelX, pixelY);
+                
+                if (currentMode === 'paint') {
+                    drawPixel(pixelX, pixelY);
+                } else {
+                    erasePixel(pixelX, pixelY);
+                }
+            }
+        });
+        
+        // 鼠标移动事件
+        canvasInteraction.addEventListener('mousemove', function(event) {
+            event.preventDefault();
+            
+            if (isDragging) {
+                // 拖拽画布
+                canvasOffsetX = event.clientX - dragStartX;
+                canvasOffsetY = event.clientY - dragStartY;
+                
+                canvasWrapper.style.transform = `translate(${canvasOffsetX}px, ${canvasOffsetY}px)`;
+            } else if (isDrawing) {
+                // 连续绘制
+                const { pixelX, pixelY } = getPixelCoordinates(event);
+                
+                if (currentMode === 'paint') {
+                    drawPixel(pixelX, pixelY);
+                } else {
+                    erasePixel(pixelX, pixelY);
+                }
+            }
+            
+            // 显示鼠标位置预览
+            const { pixelX, pixelY } = getPixelCoordinates(event);
+            if (pixelX >= 0 && pixelX < CANVAS_WIDTH && pixelY >= 0 && pixelY < CANVAS_HEIGHT) {
+                // 在交互层上绘制预览
+                ctxInteraction.clearRect(0, 0, canvasInteraction.width, canvasInteraction.height);
+                
+                // 绘制预览方块（使用实际像素大小）
+                ctxInteraction.fillStyle = currentMode === 'erase' ? 'rgba(255, 0, 0, 0.3)' : `${currentColor}80`;
+                ctxInteraction.fillRect(
+                    pixelX * PIXEL_SIZE, 
+                    pixelY * PIXEL_SIZE, 
+                    PIXEL_SIZE, 
+                    PIXEL_SIZE
+                );
+                
+            }
+        });
+        
+        // 鼠标释放事件
+        document.addEventListener('mouseup', function(event) {
+            event.preventDefault();
+            isDrawing = false;
+            
+            if (isDragging) {
+                isDragging = false;
+                // 恢复光标样式
+                canvasWrapper.style.cursor = 'crosshair';
+            }
+        });
+        
+        // 鼠标离开Canvas
+        canvasInteraction.addEventListener('mouseleave', function() {
+            // 清除交互层预览
+            ctxInteraction.clearRect(0, 0, canvasInteraction.width, canvasInteraction.height);
+        });
+        
+        // 颜色选择按钮事件
+        colorPickBtn.addEventListener('click', function() {
+            // 切换取色模式
+            if (currentMode === 'color-pick') {
+                setMode('paint');
+                colorPickBtn.textContent = `取色 (当前: ${currentColorSpan.textContent})`;
+                colorPickBtn.style.backgroundColor = 'transparent';
+            } else {
+                setMode('color-pick');
+                colorPickBtn.textContent = '点击画布取色 (ESC取消)';
+                colorPickBtn.style.backgroundColor = '#4cc9f0';
+                colorPickBtn.style.color = '#FFFFFF';
+                
+                // 监听ESC键取消取色
+                const escHandler = function(event) {
+                    if (event.key === 'Escape') {
+                        setMode('paint');
+                        colorPickBtn.textContent = `取色 (当前: ${currentColorSpan.textContent})`;
+                        colorPickBtn.style.backgroundColor = 'transparent';
+                        colorPickBtn.style.color = '';
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
+            }
+        });
+        
+        // 取色模式的点击事件
+        canvasInteraction.addEventListener('click', function(event) {
+            if (currentMode === 'color-pick') {
+                pickColor(event);
+                setMode('paint');
+                colorPickBtn.textContent = `取色 (当前: ${currentColorSpan.textContent})`;
+                colorPickBtn.style.backgroundColor = 'transparent';
+                colorPickBtn.style.color = '';
+            }
+        });
+        
+        // 擦除按钮事件
+        eraseBtn.addEventListener('click', function() {
+            if (currentMode === 'erase') {
+                setMode('paint');
+            } else {
+                setMode('erase');
+            }
+        });
+        
+        // 清除所有按钮事件
+        clearAllBtn.addEventListener('click', clearCanvas);
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            // B键: 切换画笔/擦除
+            if (event.key === 'b' || event.key === 'B') {
+                setMode(currentMode === 'paint' ? 'erase' : 'paint');
+                event.preventDefault();
+            }
+            
+            // C键: 取色
+            if (event.key === 'c' || event.key === 'C') {
+                if (currentMode !== 'color-pick') {
+                    setMode('color-pick');
+                    colorPickBtn.textContent = '点击画布取色 (ESC取消)';
+                    colorPickBtn.style.backgroundColor = '#4cc9f0';
+                    colorPickBtn.style.color = '#FFFFFF';
+                }
+                event.preventDefault();
+            }
+            
+            // Ctrl+Z: 撤销 (待实现)
+            if (event.ctrlKey && event.key === 'z') {
+                event.preventDefault();
+                // 这里可以添加撤销逻辑
+            }
+            
+            if (event.ctrlKey && event.key === 's'){
+                event.preventDefault();
+                savePixel();
+            }
+
+            // 0键: 重置缩放
+            if (event.key === '0') {
+                currentZoomIndex = DEFAULT_ZOOM_INDEX;
+                applyZoom();
+                event.preventDefault();
+            }
+            
+            // R键: 重置视图位置
+            if (event.key === 'r' || event.key === 'R') {
+                canvasOffsetX = 0;
+                canvasOffsetY = 0;
+                canvasWrapper.style.transform = 'translate(0px, 0px)';
+                event.preventDefault();
+            }
+        });
+        
+        // 防止拖拽时选择文本
+        document.addEventListener('dragstart', function(event) {
+            event.preventDefault();
+        });
+        
+        // 防止右键菜单
+        canvasInteraction.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+        
+        // 鼠标滚轮缩放
+        canvasInteraction.addEventListener('wheel', function(event) {
+            if (event.ctrlKey) {
+                event.preventDefault();
+                if (event.deltaY < 0) {
+                    // 滚轮向上，放大
+                    if (currentZoomIndex < ZOOM_LEVELS.length - 1) {
+                        currentZoomIndex++;
+                        applyZoom();
+                    }
+                } else {
+                    // 滚轮向下，缩小
+                    if (currentZoomIndex > 0) {
+                        currentZoomIndex--;
+                        applyZoom();
+                    }
+                }
+            }
+        }, { passive: false });
+    }
+    
+    // 初始化应用
+    function initApp() {
+        console.log('初始化像素画布编辑器...');
+        console.log('画布尺寸:', CANVAS_WIDTH, 'x', CANVAS_HEIGHT);
+        
+        initCanvases();
+        initColorPicker();
+        initEventListeners();
+        
+        // 设置默认颜色
+        setColor('#000000');
+        setMode('paint');
+        
+        console.log('像素画布编辑器已初始化完成');
+    }
+    
+    // 启动应用
+    initApp();
+});
+</script>
+
+<style>
+    /* 添加新的Canvas相关样式 */
+    .canvas-wrapper {
+        position: relative;
+        user-select: none;
+    }
+    
+    .canvas-layer {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+    }
+    
+    /* 擦除模式光标 */
+    .canvas-wrapper.eraser-mode {
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23f44336' d='M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.29a2 2 0 0 1-2.82 0L2.81 14.8a2 2 0 0 1 0-2.83l10.83-10.87a2 2 0 0 1 2.82 0zM7.07 14.91l2.83 2.83L5.48 19l-2.12-2.12 3.71-3.97z'/%3E%3C/svg%3E") 12 12, auto;
+    }
+    
+    /* 拖拽模式光标 */
+    .canvas-wrapper.dragging {
+        cursor: grabbing !important;
+    }
+    
+    /* 坐标显示 */
+    .cursor-coordinates {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}

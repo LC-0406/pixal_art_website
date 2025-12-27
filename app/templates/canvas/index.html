@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}我的画布 - LC Pixal Art{% endblock %}
+{% block title %}我的画布 - Pixal Art{% endblock %}
 
 {% block content %}
 {% if current_user.is_authenticated %}
@@ -64,7 +64,7 @@
 {% else %}
     <!-- 未登录用户看到的页面 -->
     <div class="welcome-section">
-        <h1>欢迎来到 LC Pixal Art</h1>
+        <h1>欢迎来到 Pixal Art</h1>
         <p>
             这是一个创意像素画平台，在这里你可以创建、编辑和分享你的像素艺术作品。
             使用我们强大的像素编辑器，创作属于你自己的像素世界！
@@ -99,7 +99,7 @@
                     
                     <div class="canvas-info">
                         <span class="canvas-date">
-                            作者: {{ canvas.user.username if canvas.user else '匿名' }}
+                            作者: {{ canvas.author.username if canvas.author else '未知用户' }}
                         </span>
                         <span class="canvas-visibility">
                             公开

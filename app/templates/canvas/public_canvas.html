@@ -21,6 +21,9 @@
                         <span class="canvas-date">
                             更新: {{ canvas.updated_at.strftime('%Y-%m-%d') if canvas.updated_at else '未知' }}
                         </span>
+                        <span class="canvas-date">
+                            作者: {{ canvas.author.username if canvas.author else '未知用户' }}
+                        </span>
                         <span class="canvas-visibility">
                             {{ '公开' if canvas.is_public else '私有' }}
                         </span>

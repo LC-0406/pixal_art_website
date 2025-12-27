@@ -451,6 +451,12 @@ main {
     margin: 0 -1rem;
 }
 
+.justify-content-evenly {
+    width: 100%;
+    max-width: 1600px; /* 设置具体最大宽度 */
+    margin: 0 auto;
+}
+
 .justify-content-center {
     justify-content: center;
 }
