@@ -1,5 +1,6 @@
 # pixal_art_website
 同一个项目，未上传虚拟环境和数据库
+```mermaid
 flowchart TD
     A[客户端(浏览器)<br>发起HTTP请求<br>GET /login] --> B{Flask应用<br>接收请求}
     
@@ -35,3 +36,4 @@ flowchart TD
     style G fill:#f3e5f5
     style L fill:#fff3e0
     style M fill:#e1f5fe
+```
