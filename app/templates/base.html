@@ -35,7 +35,7 @@
             {% endif %}
         </div>
     </nav>
-    
+    {% block content2 %}
     <main>
         <!-- 消息提示区域 - 支持Bootstrap和自定义类名 -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -52,7 +52,7 @@
         
         {% block content %}{% endblock %}
     </main>
-    {% block content2 %}{% endblock %}
+    {% endblock %}
 
     <!-- 页面特定JavaScript -->
     {% block scripts %}{% endblock %}

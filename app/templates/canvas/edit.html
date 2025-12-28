@@ -2,7 +2,8 @@
 
 {% block title %}编辑 - {{ canvas.title }}{% endblock %}
 
-{% block content %}
+{% block content2 %}
+<main style="max-width: 2000px; min-width: 1600px;">
 <div class="row justify-content-evenly">
     
     <!-- 左侧颜色选择器区域 - 固定在左侧 -->
@@ -101,12 +102,14 @@
             <!-- 画布操作按钮 -->
             <div class="canvas-actions" style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(76, 201, 240, 0.3);">
                 <div style="display: flex; flex-direction: row; width: 100%; gap: 8px">
-                    <a href="{{ url_for('canvas.view', canvas_id=canvas.id) }}" 
-                       class="canvas-btn canvas-btn-view" style="text-align: center;">
-                        完成编辑
-                    </a>
+                    <!-- 修改：将链接改为按钮，添加保存功能 -->
+                    <button id="save-and-exit-btn" 
+                            class="canvas-btn canvas-btn-view" 
+                            style="text-align: center; width: 100%;">
+                        完成编辑并保存
+                    </button>
                     <a href="{{ url_for('canvas.index') }}" 
-                       class="canvas-btn canvas-btn-view" style="text-align: center;">
+                       class="canvas-btn canvas-btn-view" style="text-align: center; width: 100%;">
                         返回列表
                     </a>
                 </div>
@@ -219,6 +222,7 @@
         
     </div>
 </div>
+<main>
 {% endblock %}
 
 {% block scripts %}
@@ -245,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let canvasOffsetY = 0;
     let currentZoomIndex = DEFAULT_ZOOM_INDEX;
     let currentZoom = ZOOM_LEVELS[DEFAULT_ZOOM_INDEX];
+    let isSaving = false; // 添加保存状态标志
     
     // Canvas上下文变量
     let ctxPixels = null;
@@ -262,6 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const colorPickBtn = document.getElementById('color-pick-btn');
     const eraseBtn = document.getElementById('erase-btn');
     const clearAllBtn = document.getElementById('clear-all-btn');
+    const saveAndExitBtn = document.getElementById('save-and-exit-btn'); // 添加保存按钮引用
     const saveStatus = document.getElementById('save-status');
     const saveMessage = document.getElementById('save-message');
     
@@ -420,65 +426,63 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化颜色选择器
     function initColorPicker() {
-        // 预定义颜色集合 (10x8网格)
-        const colors = [
-            // 第一行: 基础颜色
-            '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
-            '#FF0000', '#FF6600', '#FFCC00', '#FFFF00',
-            // 第二行
-            '#00FF00', '#00CC66', '#00FFFF', '#0066FF', '#6600FF', '#CC00FF',
-            '#FF00CC', '#FF0066', '#FF3300', '#FF6633',
-            // 第三行
-            '#993300', '#663300', '#330000', '#003300', '#003333', '#000033',
-            '#330066', '#660099', '#9900CC', '#CC33FF',
-            // 第四行
-            '#FF66FF', '#FF99CC', '#FFCCCC', '#FFCC99', '#FFFF99', '#CCFF99',
-            '#99FF99', '#66FFCC', '#99FFFF', '#CCFFFF',
-            // 第五行
-            '#CCCCFF', '#9999FF', '#6666CC', '#333399', '#000066', '#003366',
-            '#006699', '#0099CC', '#00CCFF', '#33CCFF',
-            // 第六行
-            '#FF3333', '#FF6666', '#FF9999', '#FFCCCC', '#FFFFFF', '#E6E6E6',
-            '#B3B3B3', '#808080', '#4D4D4D', '#1A1A1A',
-            // 第七行
-            '#4A90E2', '#50E3C2', '#B8E986', '#F5A623', '#D0021B', '#9013FE',
-            '#BD10E0', '#417505', '#8B572A', '#7ED321',
-            // 第八行
-            '#F8E71C', '#8B4513', '#2E8B57', '#4682B4', '#D2691E', '#6495ED',
-            '#DC143C', '#00CED1', '#9400D3', '#FF1493'
+        // 定义8个色系，每个色系10个颜色（从深到浅）
+        const colorSets = [
+            // 红色系
+            ['#2c0000', '#4c0000', '#6d0000', '#8d0000', '#ad0000', '#ce0000', '#ee0000', '#ff3333', '#ff6666', '#ff9999'],
+            // 橙色系
+            ['#3a1f00', '#5c3000', '#7e4100', '#a05200', '#c26300', '#e47400', '#ff8500', '#ff9f33', '#ffb866', '#ffd199'],
+            // 黄色系
+            ['#333300', '#666600', '#999900', '#cccc00', '#ffff00', '#ffff33', '#ffff66', '#ffff99', '#ffffcc', '#ffffe6'],
+            // 绿色系
+            ['#003300', '#006600', '#009900', '#00cc00', '#00ff00', '#33ff33', '#66ff66', '#99ff99', '#ccffcc', '#e6ffe6'],
+            // 青色系
+            ['#003333', '#006666', '#009999', '#00cccc', '#00ffff', '#33ffff', '#66ffff', '#99ffff', '#ccffff', '#e6ffff'],
+            // 蓝色系
+            ['#000033', '#000066', '#000099', '#0000cc', '#0000ff', '#3333ff', '#6666ff', '#9999ff', '#ccccff', '#e6e6ff'],
+            // 紫色系
+            ['#1a001a', '#330033', '#4d004d', '#660066', '#800080', '#993399', '#b366b3', '#cc99cc', '#e6cce6', '#f2e6f2'],
+            // 灰色系
+            ['#000000', '#1a1a1a', '#333333', '#4d4d4d', '#666666', '#808080', '#999999', '#b3b3b3', '#cccccc', '#e6e6e6']
         ];
         
-        // 生成颜色网格
-        for (let i = 0; i < colors.length; i++) {
-            const colorDiv = document.createElement('div');
-            colorDiv.className = 'color-cell';
-            colorDiv.style.backgroundColor = colors[i];
-            colorDiv.style.width = '20px';
-            colorDiv.style.height = '20px';
-            colorDiv.style.cursor = 'pointer';
-            colorDiv.style.border = '1px solid rgba(255,255,255,0.1)';
-            colorDiv.style.boxSizing = 'border-box';
-            colorDiv.title = colors[i];
-            
-            // 添加点击事件
-            colorDiv.addEventListener('click', function() {
-                setColor(colors[i]);
-            });
-            
-            // 添加鼠标悬停效果
-            colorDiv.addEventListener('mouseenter', function() {
-                this.style.border = '1px solid #4cc9f0';
-                this.style.transform = 'scale(1.1)';
-                this.style.zIndex = '1';
-            });
-            
-            colorDiv.addEventListener('mouseleave', function() {
-                this.style.border = '1px solid rgba(255,255,255,0.1)';
-                this.style.transform = 'scale(1)';
-                this.style.zIndex = '0';
-            });
-            
-            colorPalette.appendChild(colorDiv);
+        // 清空现有的颜色格子
+        colorPalette.innerHTML = '';
+        
+        // 生成颜色网格 (8行×10列)
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 10; col++) {
+                const color = colorSets[row][col];
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'color-cell';
+                colorDiv.style.backgroundColor = color;
+                colorDiv.style.width = '20px';
+                colorDiv.style.height = '20px';
+                colorDiv.style.cursor = 'pointer';
+                colorDiv.style.border = '1px solid rgba(255,255,255,0.1)';
+                colorDiv.style.boxSizing = 'border-box';
+                colorDiv.title = color;
+                
+                // 添加点击事件
+                colorDiv.addEventListener('click', function() {
+                    setColor(color);
+                });
+                
+                // 添加鼠标悬停效果
+                colorDiv.addEventListener('mouseenter', function() {
+                    this.style.border = '1px solid #4cc9f0';
+                    this.style.transform = 'scale(1.1)';
+                    this.style.zIndex = '1';
+                });
+                
+                colorDiv.addEventListener('mouseleave', function() {
+                    this.style.border = '1px solid rgba(255,255,255,0.1)';
+                    this.style.transform = 'scale(1)';
+                    this.style.zIndex = '0';
+                });
+                
+                colorPalette.appendChild(colorDiv);
+            }
         }
     }
     
@@ -546,31 +550,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             pixelData[y][x] = pixelColor;
         }
-        
-        // 保存到服务器
-        //savePixel(x, y, pixelColor);
     }
     
-    // 保存像素到服务器
-    function savePixel() {
-        // 这里可以添加保存到服务器的逻辑
-        fetch(`/api/canvas/{{canvas.id}}/update`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                gridData: pixelData
-            })
-        })
+    // 保存画布数据到服务器
+    function saveCanvas() {
+        if (isSaving) {
+            console.log('保存正在进行中，请稍候...');
+            return Promise.resolve();
+        }
         
-        // 显示保存状态
+        isSaving = true;
         showSaveStatus('保存中...', '#FF9800');
         
-        // 模拟保存延迟
-        setTimeout(() => {
-            showSaveStatus('已保存', '#4CAF50');
-        }, 300);
+        return new Promise((resolve, reject) => {
+            // 获取CSRF令牌（如果使用Flask-WTF保护）
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            
+            // 发送保存请求
+            fetch(`/api/canvas/{{ canvas.id }}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    gridData: pixelData
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('保存成功:', data);
+                showSaveStatus('保存成功！', '#4CAF50');
+                isSaving = false;
+                resolve(data);
+            })
+            .catch(error => {
+                console.error('保存失败:', error);
+                showSaveStatus('保存失败，请重试', '#f44336');
+                isSaving = false;
+                reject(error);
+            });
+        });
     }
     
     // 显示保存状态
@@ -581,10 +606,12 @@ document.addEventListener('DOMContentLoaded', function() {
         saveStatus.style.color = color;
         saveStatus.style.border = `1px solid ${color}`;
         
-        // 3秒后隐藏
-        setTimeout(() => {
-            saveStatus.style.display = 'none';
-        }, 3000);
+        // 3秒后隐藏（成功/失败消息）
+        if (color !== '#FF9800') { // 不是"保存中..."状态
+            setTimeout(() => {
+                saveStatus.style.display = 'none';
+            }, 3000);
+        }
     }
     
     // 清除单个像素
@@ -782,6 +809,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // 清除所有按钮事件
         clearAllBtn.addEventListener('click', clearCanvas);
         
+        // 保存并退出按钮事件
+        saveAndExitBtn.addEventListener('click', function() {
+            // 禁用按钮，防止重复点击
+            saveAndExitBtn.disabled = true;
+            saveAndExitBtn.textContent = '保存中...';
+            
+            // 保存画布
+            saveCanvas()
+                .then(() => {
+                    // 保存成功后跳转到查看页面
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('canvas.view', canvas_id=canvas.id) }}";
+                    }, 1000); // 等待1秒让用户看到保存成功的提示
+                })
+                .catch(() => {
+                    // 保存失败，重新启用按钮
+                    saveAndExitBtn.disabled = false;
+                    saveAndExitBtn.textContent = '完成编辑并保存';
+                });
+        });
+        
         // 键盘快捷键
         document.addEventListener('keydown', function(event) {
             // B键: 切换画笔/擦除
@@ -807,9 +855,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 这里可以添加撤销逻辑
             }
             
-            if (event.ctrlKey && event.key === 's'){
+            // Ctrl+S: 保存画布
+            if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
-                savePixel();
+                saveCanvas();
             }
 
             // 0键: 重置缩放
@@ -857,6 +906,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }, { passive: false });
+        
+        // 离开页面时提示保存
+        window.addEventListener('beforeunload', function(event) {
+            // 这里可以添加检查是否有未保存的更改的逻辑
+            // 如果有未保存的更改，可以提示用户
+            // event.preventDefault();
+            // event.returnValue = '您有未保存的更改，确定要离开吗？';
+        });
     }
     
     // 初始化应用
@@ -914,6 +971,12 @@ document.addEventListener('DOMContentLoaded', function() {
         font-family: monospace;
         font-size: 12px;
         z-index: 1000;
+    }
+    
+    /* 保存按钮状态 */
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 </style>
 {% endblock %}
